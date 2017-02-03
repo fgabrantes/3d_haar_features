@@ -1,0 +1,31 @@
+function Feat=training_features(img, scale_array)
+% Features=training_features(img, scale_max, mode)
+% 3D Haar features function return all features values for the 3D 'img' 
+% in all possible positions.The features used are defined in haar3dfeature().
+%
+%   img - 3D image which the feature values
+%   scale_max - maximum feature scale value. This values varies from 2^i
+%       where i is 0 until scale_max
+%   mode - 0 feature scale varies separetely  
+%          1 feature scale varies simultaneosly
+
+[s1, ~]=size(scale_array);
+
+
+if(sum(sum((size(img)'*ones(1,s1))'<2*ceil((4.*(2.^(scale_array-1)))./2)))~=0)
+    error('scale_max is bigger than image size')
+end
+
+for type=1:7
+    for i=1:s1
+        clear features
+        [kernel, ~]=haar3dfeature([scale_array(i,1), scale_array(i,2), scale_array(i,3)],type);
+        filt_img=filt3d(img, kernel);
+        features=data_sorted(filt_img, type, [scale_array(i,1), scale_array(i,2), scale_array(i,3)]);
+        if (exist('Feat', 'var')==1)
+            Feat=[Feat; features];
+        else
+            Feat=features;
+        end
+    end
+end
